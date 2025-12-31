@@ -1,0 +1,33 @@
+server {
+	listen 127.0.0.1:80;
+	server_name imageplease.vds.io.test;
+	http2 on;
+	return 301 https://$host$request_uri;
+}
+
+server {
+	listen 127.0.0.1:443 ssl;
+	listen 127.0.0.1:443 quic;
+	server_name imageplease.vds.io.test;
+	http2 on;
+	http3 on;
+	keepalive_timeout 70;
+
+	add_header Alt-Svc 'h3=":443"; ma=86400';
+
+	ssl_certificate /etc/mkcert/imageplease.vds.io.test.pem;
+	ssl_certificate_key /etc/mkcert/imageplease.vds.io.test-key.pem;
+
+	root /home/imageplease.vds.io.test;
+	index index.html;
+
+	location / {
+		sendfile on;
+		sendfile_max_chunk 512k;
+		tcp_nopush on;
+		tcp_nodelay on;
+		try_files $uri $uri/ =404;
+		autoindex off;
+	}
+}
+
